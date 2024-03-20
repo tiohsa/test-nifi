@@ -1,0 +1,46 @@
+version: '3'
+services:
+  wiremock:
+    image: "wiremock/wiremock:latest"
+    container_name: my_wiremock
+    volumes:
+      - ./wiremock/extensions:/var/wiremock/extensions
+      - ./wiremock/__files:/home/wiremock/__files
+      - ./wiremock/mappings:/home/wiremock/mappings
+    ports:
+      - 9081:8080
+    entrypoint:
+      [
+        "/docker-entrypoint.sh",
+        "--global-response-templating",
+        "--disable-gzip",
+        "--verbose"
+      ]
+  app:
+    image: apache/nifi:latest
+    ports:
+      - "127.0.0.1:8081:8080"
+      - "127.0.0.1:8443:8443"
+      - "127.0.0.1:10000:1000"
+    environment:
+      # - NIFI_HOME=/opt/nifi/nifi-current
+      # - NIFI_LOG_DIR=/opt/nifi/nifi-current/logs
+      # - NIFI_TOOLKIT_HOME=/opt/nifi/nifi-toolkit-current
+      # - NIFI_PID_DIR=/opt/nifi/nifi-current/run
+      # - NIFI_BASE_DIR=/opt/nifi
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
+    healthcheck:
+      test: "${DOCKER_HEALTHCHECK_TEST:-curl localhost:8091/nifi/}"
+      interval: "60s"
+      timeout: "3s"
+      start_period: "5s"
+      retries: 5
+    volumes:
+      - ./nifi/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./nifi/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - ./nifi/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./nifi/state:/opt/nifi/nifi-current/state
+      - ./nifi/logs:/opt/nifi/nifi-current/logs
+      - ./data:/opt/nifi/data

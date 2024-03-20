@@ -1,0 +1,14 @@
+{
+  "request": {
+    "urlPath": "/test",
+    "method": "POST",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    }
+  },
+  "response": {
+    "status": 201
+  }
+}
